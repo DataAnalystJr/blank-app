@@ -3,7 +3,7 @@ import sys
 import streamlit as st
 import pandas as pd
 import joblib
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 
 decisiontree_model = joblib.load('/workspaces/blank-app/SWIFT/Models/decision_tree_model.pkl')
@@ -89,8 +89,8 @@ if st.button("Submit"):
         'Self_Employed': self_employed,
         'Credit_History': credit_history,
         'Property_Area': property_area,
-        'Applicant_Income_log': applicant_income_log,
-        'Loan_Amount_log': loan_amount_log,
+        'ApplicantIncomelog': applicant_income_log,
+        'LoanAmountlog': loan_amount_log,
         'Loan_Amount_Term_log': loan_amount_term_log,
         'Total_Income_log': total_income_log
     }
@@ -105,7 +105,6 @@ if st.button("Submit"):
         # Create a copy of input_data for display purposes
     display_data = input_data.copy()
 
-    # Replace numerical values with textual representations in display_data
     for key, value in display_data.items():
         if key in text_mapping and value in text_mapping[key]:
             display_data[key] = text_mapping[key][value]
@@ -115,24 +114,22 @@ if st.button("Submit"):
 
     # Display the input data in a row format using pandas DataFrame
     df = pd.DataFrame(row_data)
-
-    # Use Streamlit to display the DataFrame
-    st.write("### Collected Input Data:")
-    st.dataframe(df)  # or use st.table(df) for a static table
+    st.write(df)
+        # Make prediction using decision tree
+    # Make prediction using decision tree
     prediction = predict_loan_status(input_data)
     probability = decisiontree_model.predict_proba(pd.DataFrame([input_data]))[0][1]
 
 # Print the prediction with probability
     if prediction == 1:
-        print(f"The applicant is likely to pay the loan. (Probability: {probability:.2f})")
+        st.write(f"The applicant is likely to pay the loan. (Probability: {probability:.2f})")
     else:
-        print(f"The applicant is unlikely to pay the loan. (Probability: {1 - probability:.2f})")
+        st.write(f"The applicant is unlikely to pay the loan. (Probability: {1 - probability:.2f})")
 
-    # Visualization
-    plt.bar(['Repayment', 'Default'], [probability, 1 - probability])
+# Visualization
+    plt.figure(figsize=(6, 4))  # Optional: Set figure size
+    plt.bar(['Repayment', 'Default'], [probability, 1 - probability], color=['green', 'red'])
     plt.title('Loan Repayment Probability')
     plt.ylabel('Probability')
-    plt.show()
-        
-
-   
+    st.pyplot(plt)  # Use st.pyplot to display the plot in Streamlit
+    plt.clf()  # Clear the figure after displaying # Clear the figure after displaying
